@@ -7,46 +7,26 @@ Button {
 
     property color backgroundColor: "white"
 
-    width: t_metrics.tightBoundingRect.width ? t_metrics.tightBoundingRect.width : 100
-    height:t_metrics.tightBoundingRect.height ? t_metrics.tightBoundingRect.height : 40
+    // Let the label drive the size: implicitWidth/Height come from the
+    // contentItem plus this padding, so the text is never clipped.
+    padding: 12
 
     contentItem: Text {
         id: a_text
         text: control.text
         font.family: "Geometria Medium"
         font.pointSize: 18
-
-        /*
-        Component.onCompleted: {
-            console.log(text)
-            console.log(t_metrics.tightBoundingRect.width)
-        }
-        */
-    }
-
-    TextMetrics {
-        id: t_metrics
-        font: a_text.font
-        text: a_text.text
+        color: "#26282a"
+        horizontalAlignment: Text.AlignHCenter
+        verticalAlignment: Text.AlignVCenter
     }
 
     background: Rectangle {
-        width: t_metrics.tightBoundingRect.width ? t_metrics.tightBoundingRect.width : 100
-        height: t_metrics.tightBoundingRect.height ? t_metrics.tightBoundingRect.height : 40
+        implicitWidth: 100
+        implicitHeight: 40
         border.color: "#26282a"
         border.width: 1
         radius: 4
-        color: backgroundColor
-
-        /*
-        Component.onCompleted: {
-            width: t_metrics.tightBoundingRect.width ? t_metrics.tightBoundingRect.width : 150
-            height: t_metrics.tightBoundingRect.height ? t_metrics.tightBoundingRect.height : 150
-
-             console.log(t_metrics.tightBoundingRect.width)
-             console.log(width)
-            //console.log(t_metrics.tightBoundingRect.width)
-        }
-        */
+        color: control.backgroundColor
     }
 }

@@ -1,5 +1,6 @@
 QT += qml quick
 QT += gui
+QT += quickcontrols2
 
 CONFIG += qmltypes
 CONFIG += c++20

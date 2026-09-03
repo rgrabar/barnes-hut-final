@@ -18,8 +18,10 @@ Window {
 
     RowLayout {
         id: rowLayout
-        Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-        spacing:2
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.top: parent.top
+        anchors.topMargin: 12
+        spacing: 8
 
         ColorButton {
             text: qsTr("Draw quad tree")
