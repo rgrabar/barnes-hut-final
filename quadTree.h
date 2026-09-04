@@ -1,8 +1,6 @@
 #ifndef QUADTREE_H
 #define QUADTREE_H
 
-#include <algorithm>
-#include <iostream>
 #include <math.h>
 #include <stdlib.h>
 #include <vector>
@@ -127,15 +125,15 @@ public:
             dr->centerOfMass();
             m_mass += dr->m_mass;
 
-            m_newY += (ul->m_point.m_y * ul->m_mass +
-                      ur->m_point.m_y * ur->m_mass +
-                      dl->m_point.m_y * dl->m_mass +
-                      dr->m_point.m_y * dr->m_mass
+            m_newY = (ul->m_newY * ul->m_mass +
+                      ur->m_newY * ur->m_mass +
+                      dl->m_newY * dl->m_mass +
+                      dr->m_newY * dr->m_mass
                       ) / m_mass;
-            m_newX += (ul->m_point.m_x * ul->m_mass +
-                      ur->m_point.m_x * ur->m_mass +
-                      dl->m_point.m_x * dl->m_mass +
-                      dr->m_point.m_x * dr->m_mass
+            m_newX = (ul->m_newX * ul->m_mass +
+                      ur->m_newX * ur->m_mass +
+                      dl->m_newX * dl->m_mass +
+                      dr->m_newX * dr->m_mass
                       ) / m_mass;
             return;
         }

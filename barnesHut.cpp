@@ -153,7 +153,7 @@ void BarnesHutRenderer::paint() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     float topLeftX = std::numeric_limits<float>::max(), topLeftY = std::numeric_limits<float>::max(),
-          bottomRightX = std::numeric_limits<float>::min(), bottomRightY= std::numeric_limits<float>::min();
+          bottomRightX =std::numeric_limits<float>::lowest(), bottomRightY= std::numeric_limits<float>::lowest();
 
     for(const auto& p:m_allPoints) {
         topLeftX = std::min(topLeftX, p.m_x);
