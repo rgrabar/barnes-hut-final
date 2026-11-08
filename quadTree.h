@@ -7,7 +7,6 @@
 
 #include "point.h"
 
-#define THETA 1
 #define G_CONSTANT 1
 
 struct QuadTree {
@@ -139,7 +138,7 @@ public:
         }
     }
 
-    Force forcen(const Point& p) {
+    Force forcen(const Point& p, float theta) {
          if (m_empty) {
              m_force.m_x = 0;
              m_force.m_y = 0;
@@ -156,7 +155,7 @@ public:
         } else { // parent
 
             const float dist = sqrt((p.m_x-m_newX)*(p.m_x-m_newX) + (p.m_y-m_newY)*(p.m_y-m_newY)) + 0.0025;
-            if((m_maxX - m_minX) / dist <= THETA){
+            if((m_maxX - m_minX) / dist <= theta){
                 const float magnitude = G_CONSTANT*m_mass/(dist*dist*dist);
                 m_force.m_x = m_newX - p.m_x;
                 m_force.m_y = m_newY - p.m_y;
@@ -166,19 +165,19 @@ public:
                 return m_force;
 
             }else {
-                ul->forcen(p);
+                ul->forcen(p, theta);
                 m_force.m_x = ul->m_force.m_x;
                 m_force.m_y = ul->m_force.m_y;
 
-                ur->forcen(p);
+                ur->forcen(p, theta);
                 m_force.m_x += ur->m_force.m_x;
                 m_force.m_y += ur->m_force.m_y;
 
-                dl->forcen(p);
+                dl->forcen(p, theta);
                 m_force.m_x += dl->m_force.m_x;
                 m_force.m_y += dl->m_force.m_y;
 
-                dr->forcen(p);
+                dr->forcen(p, theta);
                 m_force.m_x += dr->m_force.m_x;
                 m_force.m_y += dr->m_force.m_y;
 

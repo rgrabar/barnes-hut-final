@@ -39,5 +39,21 @@ Window {
                 bh.togglePause()
             }
         }
+
+        Text {
+            text: "θ = " + bh.theta.toFixed(2)
+            color: "white"
+            font.pointSize: 14
+            Layout.leftMargin: 8
+        }
+
+        Slider {
+            id: thetaSlider
+            from: 0.0
+            to: 2.0
+            value: bh.theta
+            onMoved: bh.theta = value
+            Layout.preferredWidth: 160
+        }
     }
 }

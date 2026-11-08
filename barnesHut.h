@@ -16,6 +16,7 @@ public:
 
     void setViewportSize(const QSize &size) { m_viewportSize = size; }
     void setWindow(QQuickWindow *window) { m_window = window; }
+    void setTheta(float theta) { m_theta = theta; }
 
     void generatePoints();
 
@@ -31,15 +32,26 @@ private:
     QQuickWindow *m_window = nullptr;
     bool m_pause = 1;
     bool m_drawTree = 0;
+    float m_theta = 1.0f;
     std::vector <Point> m_allPoints;
 };
 
 class BarnesHut : public QQuickItem {
     Q_OBJECT
-
+    Q_PROPERTY(qreal theta READ theta WRITE setTheta NOTIFY thetaChanged)
     QML_ELEMENT
+
 public:
     BarnesHut();
+
+    qreal theta() const { return m_theta; }
+
+    void setTheta(qreal t) {
+        if (m_theta == t)
+            return;
+        m_theta = t;
+        emit thetaChanged();
+    }
 
     // pause signal in
     Q_INVOKABLE void togglePause() {
@@ -57,6 +69,7 @@ public slots:
 signals:
     void changeState();
     void drawTree();
+    void thetaChanged();
 
 
 private slots:
@@ -64,7 +77,7 @@ private slots:
 
 private:
     void releaseResources() override;
-
+    qreal m_theta = 1.0;
     BarnesHutRenderer *m_renderer;
     QTimer *m_update_timer;
 

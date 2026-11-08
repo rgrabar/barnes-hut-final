@@ -104,6 +104,7 @@ void BarnesHut::sync() {
         QObject::connect(this, SIGNAL(drawTree()), m_renderer, SLOT(drawTree()));
 
     }
+    m_renderer->setTheta(static_cast<float>(m_theta));
     m_renderer->setViewportSize(window()->size() * window()->devicePixelRatio());
     m_renderer->setWindow(window());
 }
@@ -184,7 +185,7 @@ void BarnesHutRenderer::paint() {
             if(p.m_x < -1 || p.m_x > 1  || p.m_y < -1 || p.m_y > 1)
                 continue;
 
-            Force f = qt.forcen(p);
+            Force f = qt.forcen(p, m_theta);
             p.m_velX += 0.0000005 * f.m_x;
             p.m_velY += 0.0000005 * f.m_y;
 
