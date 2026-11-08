@@ -4,6 +4,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <vector>
+#include <algorithm>
 
 #include "point.h"
 
@@ -16,7 +17,6 @@ private:
     bool m_leaf = true;
     bool m_empty = true;
     Point m_point;
-    struct Force m_force;
 
 public:
 
@@ -74,7 +74,8 @@ public:
         }
 
         // leaf and not empty -> split
-        if(!m_empty && p == m_point){
+        if(p == m_point){
+            m_point.m_mass += p.m_mass;
             return;
         }
         // split
@@ -112,6 +113,7 @@ public:
             m_newY = m_point.m_y;
             return;
         } else { // parent
+            m_mass = 0;
             ul->centerOfMass();
             m_mass += ul->m_mass;
 
@@ -138,52 +140,38 @@ public:
         }
     }
 
-    Force forcen(const Point& p, float theta) {
-         if (m_empty) {
-             m_force.m_x = 0;
-             m_force.m_y = 0;
+    static constexpr float SOFTENING = 0.0025f;
+
+    Force forcen(const Point& p, float theta) const {
+        if (m_empty)
             return {0, 0};
-        } else if (m_leaf) {
-            const float dist = sqrt((p.m_x-m_newX)*(p.m_x-m_newX) + (p.m_y-m_newY)*(p.m_y-m_newY)) + 0.0025;
-            const float magnitude = G_CONSTANT*m_mass/(dist*dist*dist);
-            m_force.m_x = m_newX - p.m_x;
-            m_force.m_y = m_newY - p.m_y;
-            m_force.m_x *= magnitude;
-            m_force.m_y *= magnitude;
-
-            return m_force;
-        } else { // parent
-
-            const float dist = sqrt((p.m_x-m_newX)*(p.m_x-m_newX) + (p.m_y-m_newY)*(p.m_y-m_newY)) + 0.0025;
-            if((m_maxX - m_minX) / dist <= theta){
-                const float magnitude = G_CONSTANT*m_mass/(dist*dist*dist);
-                m_force.m_x = m_newX - p.m_x;
-                m_force.m_y = m_newY - p.m_y;
-                m_force.m_x *= magnitude;
-                m_force.m_y *= magnitude;
-
-                return m_force;
-
-            }else {
-                ul->forcen(p, theta);
-                m_force.m_x = ul->m_force.m_x;
-                m_force.m_y = ul->m_force.m_y;
-
-                ur->forcen(p, theta);
-                m_force.m_x += ur->m_force.m_x;
-                m_force.m_y += ur->m_force.m_y;
-
-                dl->forcen(p, theta);
-                m_force.m_x += dl->m_force.m_x;
-                m_force.m_y += dl->m_force.m_y;
-
-                dr->forcen(p, theta);
-                m_force.m_x += dr->m_force.m_x;
-                m_force.m_y += dr->m_force.m_y;
-
-                return m_force;
-            }
+        if (m_leaf && m_point == p)      // this leaf is p itself: no self-force
+            return {0, 0};
+    
+        const float dx = m_newX - p.m_x;
+        const float dy = m_newY - p.m_y;
+        const float r  = std::sqrt(dx * dx + dy * dy);
+    
+        const float size = std::max(m_maxX - m_minX, m_maxY - m_minY);
+        const bool containsP = p.m_x >= m_minX && p.m_x <= m_maxX &&
+                               p.m_y >= m_minY && p.m_y <= m_maxY;
+    
+        // A single body, or a cell that is far enough away and doesn't contain p:
+        // treat it as one point mass at its center of mass.
+        if (m_leaf || (!containsP && size < theta * r)) {
+            const float d = r + SOFTENING;
+            const float k = G_CONSTANT * m_mass / (d * d * d);
+            return {dx * k, dy * k};
         }
+    
+        // Otherwise open the cell and add up the children's forces.
+        Force f;
+        for (const QuadTree* child : {ul, ur, dl, dr}) {
+            const Force cf = child->forcen(p, theta);
+            f.m_x += cf.m_x;
+            f.m_y += cf.m_y;
+        }
+        return f;
     }
 };
 

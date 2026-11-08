@@ -65,28 +65,35 @@ void BarnesHutRenderer::generatePoints() {
     p.m_x = 0;
     p.m_y = 0;
     p.m_mass = 50000000;
-    m_allPoints.push_back(p);
-    for(int i = 0; i < NUMPOINTS; i++) {
-        // Choose a distance from the center of the galaxy.
-        const float distance = static_cast <float> (rand()) / (2 * static_cast <float> (RAND_MAX)) + 0.05;
+    m_allPoints.push_back(p);                 // body 0: the center
 
-        // Choose an angle between 0 and 2 * PI.
+    // 1. Add all 30,000 disk bodies (speed is still 0 here)
+    for(int i = 0; i < NUMPOINTS; i++) {
+        const float distance = static_cast <float> (rand()) / (2 * static_cast <float> (RAND_MAX)) + 0.05;
         const float angle = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX)) * 2 * 3.14159265358979323846;
 
-        const float M = G_CONSTANT*45000000;
-        const float v = sqrt(M/abs(distance));
-
         Point temp;
-        // Translate from polar to cartesian coords.
         temp.m_x = cos(angle) * distance;
         temp.m_y = sin(angle) * distance;
         temp.m_mass = 1500;
 
-        // initial speed
-        temp.m_velX = v*sin(angle);
-        temp.m_velY = -v*cos(angle);
+        m_allPoints.emplace_back(temp);       // adds the body to the list
+    }
 
-        m_allPoints.emplace_back(temp);
+    // 2. Give each disk body the speed of a circular orbit under the pull it actually
+    //    feels (the center plus the whole disk), measured with the tree itself.
+    QuadTree qt(-0.6f, 0.6f, -0.6f, 0.6f);
+    for (const auto& b : m_allPoints) qt.insert(b);
+    qt.centerOfMass();
+
+    for (size_t i = 1; i < m_allPoints.size(); i++) {   // skip body 0, the center stays at rest
+        Point& b = m_allPoints[i];                       // reference: edits the body in the list
+        const float r = std::sqrt(b.m_x * b.m_x + b.m_y * b.m_y);
+        const Force f = qt.forcen(b, 0.5f);
+        const float inward = -(f.m_x * b.m_x + f.m_y * b.m_y) / r;
+        const float v = std::sqrt(std::max(0.0f, inward * r));
+        b.m_velX =  v * b.m_y / r;
+        b.m_velY = -v * b.m_x / r;
     }
 }
 
